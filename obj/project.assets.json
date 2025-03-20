@@ -235,11 +235,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/ofir/Projects/consumer/consumer.csproj",
+      "projectUniqueName": "/Users/ofir/Projects/tdp-2025-homework/popcorn_palace_typescript/consumer.csproj",
       "projectName": "consumer",
-      "projectPath": "/Users/ofir/Projects/consumer/consumer.csproj",
+      "projectPath": "/Users/ofir/Projects/tdp-2025-homework/popcorn_palace_typescript/consumer.csproj",
       "packagesPath": "/Users/ofir/.nuget/packages/",
-      "outputPath": "/Users/ofir/Projects/consumer/obj/",
+      "outputPath": "/Users/ofir/Projects/tdp-2025-homework/popcorn_palace_typescript/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/ofir/.nuget/NuGet/NuGet.Config"

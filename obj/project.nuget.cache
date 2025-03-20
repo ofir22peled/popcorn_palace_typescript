@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Dgnslf3y4lY=",
+  "dgSpecHash": "ZFc7dBhLKLQ=",
   "success": true,
-  "projectFilePath": "/Users/ofir/Projects/consumer/consumer.csproj",
+  "projectFilePath": "/Users/ofir/Projects/tdp-2025-homework/popcorn_palace_typescript/consumer.csproj",
   "expectedPackageFiles": [
     "/Users/ofir/.nuget/packages/microsoft.aspnetcore.openapi/9.0.0/microsoft.aspnetcore.openapi.9.0.0.nupkg.sha512",
     "/Users/ofir/.nuget/packages/microsoft.openapi/1.6.17/microsoft.openapi.1.6.17.nupkg.sha512",
