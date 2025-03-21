@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, MethodNotAllowedException, NotFoundException } from '@nestjs/common';
 import { Movie } from './movies.interface';
 
 @Injectable()
@@ -14,6 +14,10 @@ export class MoviesService {
     }
 
     addMovie(movie: Omit<Movie, 'id'>): Movie {
+        const index = this.movies.findIndex(movieInDB => movieInDB.title === movie.title);
+        if (index !== -1) {
+          throw new ConflictException(`Movie with title "${movie.title}" already exists`);
+        }
         const newMovie: Movie = { id: this.nextId++, ...movie };
         this.movies.push(newMovie);
         return newMovie;
