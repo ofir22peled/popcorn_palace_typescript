@@ -5,8 +5,9 @@ import { MoviesModule } from './modules/movies/movies.module';
 import { ShowtimesModule } from './modules/showtimes/showtimes.module';
 
 @Module({
-  imports: [MoviesModule], [ShowtimesModule]
+  imports: [MoviesModule, ShowtimesModule],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
+

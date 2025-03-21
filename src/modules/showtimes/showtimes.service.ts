@@ -3,7 +3,7 @@
  * Handles business logic such as preventing overlapping showtimes.
  */
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Showtime } from './showtime.interface';
+import { Showtime } from './showtimes.interface';
 import { CreateShowtimeDto } from './dto/create-showtime.dto';
 import { UpdateShowtimeDto } from './dto/update-showtime.dto';
 

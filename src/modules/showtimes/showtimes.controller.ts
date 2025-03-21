@@ -2,7 +2,7 @@
  * Controller handling API requests for showtimes.
  */
 import { Controller, Get, Post, Delete, Param, Body, UsePipes, ValidationPipe } from '@nestjs/common';
-import { ShowtimesService } from './showtime.service';
+import { ShowtimesService } from './showtimes.service';
 import { CreateShowtimeDto } from './dto/create-showtime.dto';
 import { UpdateShowtimeDto } from './dto/update-showtime.dto';
 
