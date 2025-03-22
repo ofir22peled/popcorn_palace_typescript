@@ -9,5 +9,6 @@ export interface Showtime {
     startTime: string;
     endTime: string;
     price: number;
+    seats: number[]; // 0 = available, 1 = reserved
   }
   
