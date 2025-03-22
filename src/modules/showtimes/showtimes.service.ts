@@ -2,7 +2,7 @@
  * Service that manages showtimes.
  * Handles business logic such as preventing overlapping showtimes.
  */
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Showtime } from './showtimes.interface';
 import { CreateShowtimeDto } from './dto/create-showtime.dto';
 import { UpdateShowtimeDto } from './dto/update-showtime.dto';
@@ -43,7 +43,7 @@ export class ShowtimesService {
     );
 
     if (conflict) {
-      throw new Error('Showtime conflicts with an existing showtime in the same theater.');
+      throw new ConflictException('Showtime conflicts with an existing showtime in the same theater.');
     }
 
     const newShowtime: Showtime = { id: this.nextId++, ...showtimeDto };
