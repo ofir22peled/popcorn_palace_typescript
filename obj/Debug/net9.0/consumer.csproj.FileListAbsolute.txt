@@ -1,8 +1,0 @@
-/Users/ofir/Projects/consumer/obj/Debug/net9.0/consumer.csproj.AssemblyReference.cache
-/Users/ofir/Projects/consumer/obj/Debug/net9.0/consumer.GeneratedMSBuildEditorConfig.editorconfig
-/Users/ofir/Projects/consumer/obj/Debug/net9.0/consumer.AssemblyInfoInputs.cache
-/Users/ofir/Projects/consumer/obj/Debug/net9.0/consumer.AssemblyInfo.cs
-/Users/ofir/Projects/consumer/obj/Debug/net9.0/consumer.csproj.CoreCompileInputs.cache
-/Users/ofir/Projects/consumer/obj/Debug/net9.0/consumer.MvcApplicationPartsAssemblyInfo.cs
-/Users/ofir/Projects/consumer/obj/Debug/net9.0/consumer.MvcApplicationPartsAssemblyInfo.cache
-/Users/ofir/Projects/consumer/obj/Debug/net9.0/consumer.sourcelink.json
