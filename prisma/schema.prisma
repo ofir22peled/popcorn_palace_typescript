@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Movie {
+  id          Int        @id @default(autoincrement())
+  title       String
+  genre       String
+  duration    Int
+  rating      Float
+  releaseYear Int
+  showtimes   Showtime[]
+}
+model Showtime {
+  id        Int       @id @default(autoincrement())
+  movie Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  movieId   Int
+  price     Float
+  theater   String
+  startTime DateTime
+  endTime   DateTime
+  bookings  Booking[]
+}
+
+model Booking {
+  id         String   @id @default(uuid())
+  showtime Showtime @relation(fields: [showtimeId], references: [id], onDelete: Cascade)
+  showtimeId Int
+  seatNumber Int
+  userId     String
+
+  @@unique([showtimeId, seatNumber])
+}
+
