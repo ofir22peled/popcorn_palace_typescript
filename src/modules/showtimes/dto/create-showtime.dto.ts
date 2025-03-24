@@ -1,15 +1,15 @@
+import { IsInt, IsDateString, IsPositive, IsString } from 'class-validator';
+
 /**
  * DTO for creating a new showtime.
- * Ensures that only valid data is accepted.
+ * Ensures that only valid data is accepted when creating a showtime.
  */
-import { IsInt, IsDateString, IsPositive } from 'class-validator';
-
 export class CreateShowtimeDto {
   @IsInt()
   movieId: number;
 
-  @IsInt()
-  theaterId: number;
+  @IsString()
+  theater: string;
 
   @IsDateString()
   startTime: string;

@@ -1,27 +1,8 @@
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateShowtimeDto } from './create-showtime.dto';
+
 /**
- * DTO for updating an existing showtime.
- * All fields are optional to allow partial updates.
+ * Inherits all validations from CreateShowtimeDto,
+ * but makes every field optional for flexible partial updates.
  */
-import { IsInt, IsDateString, IsPositive, IsOptional } from 'class-validator';
-
-export class UpdateShowtimeDto {
-  @IsOptional()
-  @IsInt()
-  movieId?: number;
-
-  @IsOptional()
-  @IsInt()
-  theaterId?: number;
-
-  @IsOptional()
-  @IsDateString()
-  startTime?: string;
-
-  @IsOptional()
-  @IsDateString()
-  endTime?: string;
-
-  @IsOptional()
-  @IsPositive()
-  price?: number;
-}
+export class UpdateShowtimeDto extends PartialType(CreateShowtimeDto) {}

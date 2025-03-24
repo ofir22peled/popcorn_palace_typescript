@@ -1,10 +1,15 @@
 import { Module } from '@nestjs/common';
-import { ShowtimesService } from './showtimes.service';
 import { ShowtimesController } from './showtimes.controller';
+import { ShowtimesService } from './showtimes.service';
+import { PrismaModule } from '../../../prisma/prisma.module';
 
+/**
+ * Registers the controller and service for showtimes.
+ */
 @Module({
-  controllers: [ShowtimesController], // ✅ Registers the controller
-  providers: [ShowtimesService], // ✅ Registers the service
-  exports: [ShowtimesService], // ✅ (Optional) If another module needs it
+  imports: [PrismaModule],
+  controllers: [ShowtimesController],
+  providers: [ShowtimesService],
+  exports: [ShowtimesService], // Exported for use in BookingsModule
 })
 export class ShowtimesModule {}

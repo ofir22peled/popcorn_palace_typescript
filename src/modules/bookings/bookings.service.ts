@@ -1,51 +1,58 @@
 import { Injectable } from '@nestjs/common';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { ShowtimesService } from '../showtimes/showtimes.service';
-import { Booking } from './entities/booking.entity';
+import { PrismaService } from '../../../prisma/prisma.service';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
- * Service responsible for creating bookings and managing seat reservations.
+ * Service responsible for managing seat bookings.
+ * Handles seat availability, reservation, and booking persistence.
  */
 @Injectable()
 export class BookingsService {
-  private bookings: Booking[] = []; // temporary in-memory storage
-
   constructor(
-    private readonly showtimesService: ShowtimesService
+    private readonly showtimesService: ShowtimesService,
+    private readonly prisma: PrismaService,
   ) {}
 
   /**
-   * Creates a booking if the showtime and seat are available.
-   * @param dto - booking request containing showtimeId, seatNumber, and userId
-   * @returns an object with bookingId if successful, or an error message
+   * Attempts to create a new booking.
+   * Validates showtime existence and seat availability,
+   * then creates the booking in the database.
    */
   async createBooking(dto: CreateBookingDto): Promise<{ bookingId?: string; success: boolean; message: string }> {
+    // Validate showtime existence
     const showtime = await this.showtimesService.findById(dto.showtimeId);
     if (!showtime) {
       return { success: false, message: 'Showtime not found' };
     }
 
+    // Check if the requested seat is available
     const isAvailable = await this.showtimesService.isSeatAvailable(dto.showtimeId, dto.seatNumber);
     if (!isAvailable) {
       return { success: false, message: 'Seat not available' };
     }
 
-    const success = await this.showtimesService.reserveSeat(dto.showtimeId, dto.seatNumber);
-    if (!success) {
+    // Attempt to reserve the seat
+    const reserved = await this.showtimesService.reserveSeat(dto.showtimeId, dto.seatNumber);
+    if (!reserved) {
       return { success: false, message: 'Failed to reserve seat' };
     }
 
-    const booking: Booking = {
-      id: uuidv4(),
-      userId: dto.userId,
-      showtimeId: dto.showtimeId,
-      seatNumber: dto.seatNumber,
-      createdAt: new Date(),
+    // Create booking in the database
+    const booking = await this.prisma.booking.create({
+      data: {
+        id: uuidv4(),
+        userId: dto.userId,
+        showtimeId: dto.showtimeId,
+        seatNumber: dto.seatNumber,
+      },
+    });
+
+    return {
+      success: true,
+      message: 'Booking successful',
+      bookingId: booking.id,
     };
-
-    this.bookings.push(booking);
-
-    return { success: true, message: 'Booking successful', bookingId: booking.id };
   }
 }

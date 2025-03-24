@@ -18,6 +18,6 @@ export class CreateMovieDto {
 
   @IsInt()
   @Min(1900)
-  @Max(new Date().getFullYear())
+  @Max(new Date().getFullYear()) // Runtime dynamic validation
   releaseYear: number;
 }

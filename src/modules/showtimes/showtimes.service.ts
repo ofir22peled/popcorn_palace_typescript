@@ -1,143 +1,160 @@
 import {
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { Showtime } from './showtimes.interface';
+import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateShowtimeDto } from './dto/create-showtime.dto';
 import { UpdateShowtimeDto } from './dto/update-showtime.dto';
 
 /**
- * Service that manages showtimes.
- * Handles business logic such as preventing overlapping showtimes
- * and managing seat availability for ticket booking.
+ * Service that handles all business logic related to showtimes.
  */
 @Injectable()
 export class ShowtimesService {
-  private showtimes: Showtime[] = [];
-  private nextId = 1;
+  private readonly logger = new Logger(ShowtimesService.name);
+
+  constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * Get all showtimes.
+   * Retrieves a single showtime by its ID.
+   * Throws NotFoundException if the showtime does not exist.
    */
-  getShowtimes(): Showtime[] {
-    return this.showtimes;
-  }
+  async getShowtimeById(id: number) {
+    const showtime = await this.prisma.showtime.findUnique({
+      where: { id },
+    });
 
-  /**
-   * Get a single showtime by ID.
-   * Throws NotFoundException if not found.
-   */
-  getShowtimeById(id: number): Showtime {
-    const showtime = this.showtimes.find((st) => st.id === id);
     if (!showtime) {
+      this.logger.warn(`Showtime with ID ${id} not found`);
       throw new NotFoundException(`Showtime with ID ${id} not found.`);
     }
+
+    this.logger.log(`Retrieving showtime with ID ${id}`);
     return showtime;
   }
 
   /**
-   * Add a new showtime.
-   * Ensures no overlapping showtimes in the same theater.
-   * Initializes the seats array to track seat availability.
+   * Creates a new showtime, ensuring no overlap with existing showtimes.
+   * Initializes 50 seats as available.
+   * Logs the creation event.
    */
-  addShowtime(showtimeDto: CreateShowtimeDto): Showtime {
-    // Check for overlapping showtimes
-    const conflict = this.showtimes.find(
-      (st) =>
-        st.theaterId === showtimeDto.theaterId &&
-        ((showtimeDto.startTime >= st.startTime &&
-          showtimeDto.startTime < st.endTime) ||
-          (showtimeDto.endTime > st.startTime &&
-            showtimeDto.endTime <= st.endTime))
-    );
+  async addShowtime(dto: CreateShowtimeDto) {
+    const overlapping = await this.prisma.showtime.findFirst({
+      where: {
+        theater: dto.theater,
+        OR: [
+          {
+            startTime: { lte: dto.startTime },
+            endTime: { gt: dto.startTime },
+          },
+          {
+            startTime: { lt: dto.endTime },
+            endTime: { gte: dto.endTime },
+          },
+        ],
+      },
+    });
 
-    if (conflict) {
+    if (overlapping) {
+      this.logger.warn(`Overlap detected for theater "${dto.theater}"`);
       throw new ConflictException(
-        'Showtime conflicts with an existing showtime in the same theater.',
+        'Showtime conflicts with another showtime in the same theater.',
       );
     }
 
-    const newShowtime: Showtime = {
-      id: this.nextId++,
-      ...showtimeDto,
-      seats: Array(50).fill(0), // initialize 50 available seats (0 = free, 1 = reserved)
+    this.logger.log(`Creating new showtime for movieId ${dto.movieId}`);
+    const created = await this.prisma.showtime.create({
+      data: {
+        ...dto,
+        seatsAvailable: Array(50).fill(0), // Initialize 50 available seats
+      },
+    });
+
+    // Respond only with the required fields as per the README
+    return {
+      id: created.id,
+      price: created.price,
+      movieId: created.movieId,
+      theater: created.theater,
+      startTime: created.startTime,
+      endTime: created.endTime,
     };
-
-    this.showtimes.push(newShowtime);
-    return newShowtime;
   }
 
   /**
-   * Update an existing showtime.
+   * Updates an existing showtime by ID.
+   * Logs the update event and throws NotFoundException if not found.
    */
-  updateShowtime(id: number, updatedShowtime: UpdateShowtimeDto): Showtime {
-    const index = this.showtimes.findIndex((st) => st.id === id);
-    if (index === -1) {
-      throw new NotFoundException(`Showtime with ID ${id} not found.`);
-    }
-
-    this.showtimes[index] = {
-      ...this.showtimes[index],
-      ...updatedShowtime,
-    };
-    return this.showtimes[index];
+  async updateShowtime(id: number, dto: UpdateShowtimeDto) {
+    await this.getShowtimeById(id); // Ensure the showtime exists
+    this.logger.log(`Updating showtime ID ${id}`);
+    return this.prisma.showtime.update({
+      where: { id },
+      data: dto,
+    });
   }
 
   /**
-   * Delete a showtime by ID.
+   * Deletes a showtime by ID.
+   * Logs the deletion event and throws NotFoundException if not found.
    */
-  deleteShowtime(id: number): Showtime {
-    const index = this.showtimes.findIndex((st) => st.id === id);
-    if (index === -1) {
-      throw new NotFoundException(`Showtime with ID ${id} not found.`);
-    }
-    return this.showtimes.splice(index, 1)[0];
+  async deleteShowtime(id: number) {
+    await this.getShowtimeById(id); // Ensure the showtime exists
+    this.logger.warn(`Deleting showtime ID ${id}`);
+    return this.prisma.showtime.delete({
+      where: { id },
+    });
   }
 
   /**
-   * Find a showtime by ID (for external use like booking service).
-   * Returns undefined if not found.
+   * Used internally by other services to fetch showtime details.
    */
-  async findById(id: number): Promise<Showtime | undefined> {
-    return this.showtimes.find((s) => s.id === id);
+  async findById(id: number) {
+    return this.prisma.showtime.findUnique({
+      where: { id },
+    });
   }
 
   /**
    * Checks if a specific seat is available for a given showtime.
-   * @param showtimeId - Showtime ID
-   * @param seatNumber - Seat number (1-based)
    */
-  async isSeatAvailable(
-    showtimeId: number,
-    seatNumber: number,
-  ): Promise<boolean> {
-    const showtime = await this.findById(showtimeId);
-    if (!showtime) return false;
+  async isSeatAvailable(showtimeId: number, seatNumber: number): Promise<boolean> {
+    const showtime = await this.prisma.showtime.findUnique({
+      where: { id: showtimeId },
+    });
+
+    if (!showtime || !Array.isArray(showtime.seatsAvailable)) return false;
 
     const index = seatNumber - 1;
-    if (index < 0 || index >= showtime.seats.length) return false;
-
-    return showtime.seats[index] === 0;
+    return showtime.seatsAvailable[index] === 0;
   }
 
   /**
-   * Reserves a specific seat in the showtime if available.
-   * Returns true if successful, false otherwise.
+   * Reserves a specific seat for a given showtime if it is available.
+   * Logs the reservation event.
    */
-  async reserveSeat(
-    showtimeId: number,
-    seatNumber: number,
-  ): Promise<boolean> {
-    const showtime = await this.findById(showtimeId);
-    if (!showtime) return false;
+  async reserveSeat(showtimeId: number, seatNumber: number): Promise<boolean> {
+    const showtime = await this.prisma.showtime.findUnique({
+      where: { id: showtimeId },
+      select: { seatsAvailable: true },
+    });
+
+    if (!showtime || !Array.isArray(showtime.seatsAvailable)) return false;
 
     const index = seatNumber - 1;
-    if (index < 0 || index >= showtime.seats.length) return false;
+    if (showtime.seatsAvailable[index] === 1) return false;
 
-    if (showtime.seats[index] === 1) return false;
+    const updatedSeats = [...showtime.seatsAvailable];
+    updatedSeats[index] = 1;
 
-    showtime.seats[index] = 1;
+    await this.prisma.showtime.update({
+      where: { id: showtimeId },
+      data: { seatsAvailable: updatedSeats },
+    });
+
+    this.logger.log(`Seat ${seatNumber} reserved for showtime ${showtimeId}`);
     return true;
   }
 }

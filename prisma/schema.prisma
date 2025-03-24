@@ -9,31 +9,34 @@ datasource db {
 
 model Movie {
   id          Int        @id @default(autoincrement())
-  title       String
+  title       String @unique
   genre       String
   duration    Int
   rating      Float
   releaseYear Int
+
   showtimes   Showtime[]
 }
+
 model Showtime {
-  id        Int       @id @default(autoincrement())
-  movie Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
-  movieId   Int
-  price     Float
-  theater   String
-  startTime DateTime
-  endTime   DateTime
-  bookings  Booking[]
+  id             Int        @id @default(autoincrement())
+  movieId        Int
+  movie          Movie      @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  price          Float
+  theater        String
+  startTime      DateTime
+  endTime        DateTime
+  seatsAvailable Int[]      // 0 = free, 1 = reserved (array of 50 integers)
+
+  bookings       Booking[]
 }
 
 model Booking {
-  id         String   @id @default(uuid())
-  showtime Showtime @relation(fields: [showtimeId], references: [id], onDelete: Cascade)
+  id         String    @id @default(uuid())
   showtimeId Int
+  showtime   Showtime  @relation(fields: [showtimeId], references: [id], onDelete: Cascade)
   seatNumber Int
   userId     String
 
   @@unique([showtimeId, seatNumber])
 }
-
