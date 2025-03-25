@@ -1,5 +1,8 @@
-import { IsString, IsInt, Min, Max, IsNumber } from 'class-validator';
+import { IsString, IsInt, Min, IsNumber, Max } from 'class-validator';
 
+/**
+ * DTO to validate the input for creating a new movie.
+ */
 export class CreateMovieDto {
   @IsString()
   title: string;
@@ -18,6 +21,5 @@ export class CreateMovieDto {
 
   @IsInt()
   @Min(1900)
-  @Max(new Date().getFullYear()) // Runtime dynamic validation
-  releaseYear: number;
+  releaseYear: number; // Validation for current year done dynamically in service
 }
