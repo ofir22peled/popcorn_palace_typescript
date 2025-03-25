@@ -3,6 +3,9 @@
 
 ### Clone and Run Project
 
+requirements:
+NodeJS version 18.18 or Higher
+
 Copy and paste the following commands in your terminal:
 
 ```bash
