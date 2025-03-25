@@ -1,8 +1,8 @@
-import { IsUUID, IsInt, Min } from 'class-validator';
+import { IsInt, IsUUID, Min } from 'class-validator';
 
 /**
- * DTO for booking request.
- * Validates the required fields: showtimeId, seatNumber, userId.
+ * DTO for creating a booking.
+ * Ensures that only valid data is accepted when creating a booking.
  */
 export class CreateBookingDto {
   @IsInt()

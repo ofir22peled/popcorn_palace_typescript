@@ -1,4 +1,4 @@
-import { IsInt, IsDateString, IsPositive, IsString } from 'class-validator';
+import { IsInt, IsDateString, IsPositive, IsString, IsOptional } from 'class-validator';
 
 /**
  * DTO for creating a new showtime.

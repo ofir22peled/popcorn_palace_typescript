@@ -23,7 +23,7 @@ export class ShowtimesController {
   /**
    * POST /showtimes
    * Creates a new showtime in the database with validation.
-   * Responds with the created showtime details.
+   * Responds with the created showtime details excluding seatsAvailable.
    */
   @Post()
   @UsePipes(new ValidationPipe({ whitelist: true }))
@@ -34,16 +34,19 @@ export class ShowtimesController {
   /**
    * GET /showtimes/:id
    * Retrieves a single showtime by its ID from the database.
-   * Responds with the showtime details.
+   * Responds with the showtime details excluding seatsAvailable.
    */
   @Get(':id')
-  getShowtimeById(@Param('id') id: string) {
-    return this.showtimesService.getShowtimeById(+id);
+  async getShowtimeById(@Param('id') id: string) {
+    const showtime = await this.showtimesService.getShowtimeById(+id);
+    // Excluding seatsAvailable in the response
+    const { seatsAvailable, ...rest } = showtime;
+    return rest;
   }
 
   /**
    * POST /showtimes/update/:id
-   * Updates an existing showtime by its ID.
+   * Updates an existing showtime by ID.
    * Responds with the updated showtime details.
    */
   @Post('update/:id')

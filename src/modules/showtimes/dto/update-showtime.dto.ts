@@ -2,7 +2,11 @@ import { PartialType } from '@nestjs/mapped-types';
 import { CreateShowtimeDto } from './create-showtime.dto';
 
 /**
- * Inherits all validations from CreateShowtimeDto,
- * but makes every field optional for flexible partial updates.
+ * DTO for updating an existing showtime.
+ * All fields are optional for partial updates,
+ * but excludes `seatsAvailable` from updates.
  */
-export class UpdateShowtimeDto extends PartialType(CreateShowtimeDto) {}
+export class UpdateShowtimeDto extends PartialType(CreateShowtimeDto) {
+  // Optionally exclude seatsAvailable from the update
+  seatsAvailable?: never; // Prevents seatsAvailable from being updated
+}

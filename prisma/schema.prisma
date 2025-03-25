@@ -26,7 +26,7 @@ model Showtime {
   theater        String
   startTime      DateTime
   endTime        DateTime
-  seatsAvailable Int[]      // 0 = free, 1 = reserved (array of 50 integers)
+  seatsAvailable Int[]
 
   bookings       Booking[]
 }

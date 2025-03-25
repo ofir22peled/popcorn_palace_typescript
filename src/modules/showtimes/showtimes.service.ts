@@ -7,6 +7,7 @@ import {
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateShowtimeDto } from './dto/create-showtime.dto';
 import { UpdateShowtimeDto } from './dto/update-showtime.dto';
+import { config } from '../../../../config';
 
 /**
  * Service that handles all business logic related to showtimes.
@@ -37,8 +38,8 @@ export class ShowtimesService {
 
   /**
    * Creates a new showtime, ensuring no overlap with existing showtimes.
-   * Initializes 50 seats as available.
    * Logs the creation event.
+   * Returns only required fields.
    */
   async addShowtime(dto: CreateShowtimeDto) {
     const overlapping = await this.prisma.showtime.findFirst({
@@ -68,19 +69,13 @@ export class ShowtimesService {
     const created = await this.prisma.showtime.create({
       data: {
         ...dto,
-        seatsAvailable: Array(50).fill(0), // Initialize 50 available seats
+        seatsAvailable: Array(config.seatsPerShowtime).fill(0), // Use the config for seats
       },
     });
 
-    // Respond only with the required fields as per the README
-    return {
-      id: created.id,
-      price: created.price,
-      movieId: created.movieId,
-      theater: created.theater,
-      startTime: created.startTime,
-      endTime: created.endTime,
-    };
+    // Return only the required fields, excluding seatsAvailable
+    const { seatsAvailable, ...rest } = created;
+    return rest;
   }
 
   /**
@@ -90,11 +85,16 @@ export class ShowtimesService {
   async updateShowtime(id: number, dto: UpdateShowtimeDto) {
     await this.getShowtimeById(id); // Ensure the showtime exists
     this.logger.log(`Updating showtime ID ${id}`);
+  
+    // Exclude seatsAvailable before updating (it shouldn't be updated)
+    const { seatsAvailable, ...rest } = dto;
+  
     return this.prisma.showtime.update({
       where: { id },
-      data: dto,
+      data: rest,
     });
   }
+  
 
   /**
    * Deletes a showtime by ID.
