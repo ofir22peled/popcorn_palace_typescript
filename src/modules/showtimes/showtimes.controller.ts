@@ -23,6 +23,15 @@ import { UpdateShowtimeDto } from './dto/update-showtime.dto';
 export class ShowtimesController {
   constructor(private readonly showtimesService: ShowtimesService) {}
 
+  @Get('all')
+@ApiOperation({ summary: 'Get all showtimes' })
+@ApiResponse({ status: 200, description: 'Returns all showtimes (excluding seatsAvailable)' })
+async getAllShowtimes() {
+  const showtimes = await this.showtimesService.getAllShowtimes();
+
+  return showtimes.map(({ seatsAvailable, ...rest }) => rest);
+}
+
   /**
    * POST /showtimes
    * Creates a new showtime in the database with validation.
@@ -63,8 +72,9 @@ export class ShowtimesController {
   @Post('update/:id')
   @ApiOperation({ summary: 'Update a showtime by ID' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Showtime updated successfully' })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Showtime not found' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Showtime or movie not found' })
   @ApiResponse({ status: HttpStatus.CONFLICT, description: 'Showtime overlaps with existing one' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Validation failed' })
   @ApiParam({ name: 'id', description: 'ID of the showtime to update' })
   @ApiBody({ type: UpdateShowtimeDto })
   @UsePipes(new ValidationPipe({ whitelist: true }))
