@@ -1,16 +1,15 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { ShowtimesService } from '../showtimes/showtimes.service';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
- * Service responsible for managing seat bookings.
- * Handles seat availability, reservation, and booking persistence.
+ * Business logic for managing bookings.
  */
 @Injectable()
 export class BookingsService {
-  private readonly logger = new Logger(BookingsService.name);  // Logger for tracking actions
+  private readonly logger = new Logger(BookingsService.name);
 
   constructor(
     private readonly showtimesService: ShowtimesService,
@@ -18,33 +17,34 @@ export class BookingsService {
   ) {}
 
   /**
-   * Attempts to create a new booking.
-   * Validates showtime existence and seat availability,
-   * then creates the booking in the database.
+   * Creates a booking after validating seat availability and showtime existence.
+   * Returns bookingId if successful, else throws appropriate HTTP exceptions.
    */
-  async createBooking(dto: CreateBookingDto): Promise<{ bookingId?: string; success: boolean; message: string }> {
-    // Validate showtime existence
+  async createBooking(dto: CreateBookingDto): Promise<{ bookingId: string }> {
+    this.logger.log(`Attempting booking: ShowtimeId=${dto.showtimeId}, Seat=${dto.seatNumber}, User=${dto.userId}`);
+
+    // Verify showtime exists
     const showtime = await this.showtimesService.findById(dto.showtimeId);
     if (!showtime) {
-      this.logger.warn(`Showtime with ID ${dto.showtimeId} not found.`);
-      return { success: false, message: 'Showtime not found' };
+      this.logger.warn(`Showtime not found: ID=${dto.showtimeId}`);
+      throw new NotFoundException('Showtime not found');
     }
 
-    // Check if the requested seat is available
+    // Verify seat availability
     const isAvailable = await this.showtimesService.isSeatAvailable(dto.showtimeId, dto.seatNumber);
     if (!isAvailable) {
-      this.logger.warn(`Seat ${dto.seatNumber} is not available for showtime ${dto.showtimeId}.`);
-      return { success: false, message: 'Seat not available' };
+      this.logger.warn(`Seat unavailable: ShowtimeId=${dto.showtimeId}, Seat=${dto.seatNumber}`);
+      throw new BadRequestException('Seat not available');
     }
 
-    // Attempt to reserve the seat
+    // Reserve seat
     const reserved = await this.showtimesService.reserveSeat(dto.showtimeId, dto.seatNumber);
     if (!reserved) {
-      this.logger.error(`Failed to reserve seat ${dto.seatNumber} for showtime ${dto.showtimeId}.`);
-      return { success: false, message: 'Failed to reserve seat' };
+      this.logger.error(`Seat reservation failed: ShowtimeId=${dto.showtimeId}, Seat=${dto.seatNumber}`);
+      throw new InternalServerErrorException('Failed to reserve seat');
     }
 
-    // Create booking in the database
+    // Create booking in DB
     const booking = await this.prisma.booking.create({
       data: {
         id: uuidv4(),
@@ -54,11 +54,9 @@ export class BookingsService {
       },
     });
 
-    this.logger.log(`Booking created for userId: ${dto.userId}, showtimeId: ${dto.showtimeId}, seatNumber: ${dto.seatNumber}`);
-    return {
-      success: true,
-      message: 'Booking successful',
-      bookingId: booking.id,
-    };
+    this.logger.log(`Booking created successfully. BookingId=${booking.id}`);
+
+    // Return as per README specification
+    return { bookingId: booking.id };
   }
 }

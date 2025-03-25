@@ -2,7 +2,7 @@ import { IsInt, IsUUID, Min } from 'class-validator';
 
 /**
  * DTO for creating a booking.
- * Ensures that only valid data is accepted when creating a booking.
+ * Validates request body for booking creation.
  */
 export class CreateBookingDto {
   @IsInt()

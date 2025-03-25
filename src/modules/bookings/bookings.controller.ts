@@ -3,8 +3,7 @@ import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 
 /**
- * Controller for handling booking-related HTTP requests.
- * Handles creation, updates, and deletion of bookings.
+ * Handles HTTP requests related to bookings.
  */
 @Controller('bookings')
 export class BookingsController {
@@ -12,8 +11,7 @@ export class BookingsController {
 
   /**
    * POST /bookings
-   * Creates a new booking if the seat is available.
-   * Calls the BookingsService to handle the logic and return success or failure.
+   * Creates a booking and returns its ID.
    */
   @Post()
   async createBooking(@Body() dto: CreateBookingDto) {
