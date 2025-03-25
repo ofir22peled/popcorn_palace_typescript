@@ -26,5 +26,4 @@ npm run start:dev
 ```bash
 npm run test
 
-The server will run at: [http://localhost:3000](http://localhost:3000)
-
+The server will run at: http://localhost:3000
