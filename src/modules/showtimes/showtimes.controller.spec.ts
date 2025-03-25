@@ -59,7 +59,6 @@ describe('ShowtimesController', () => {
         startTime: new Date('2025-04-01T10:00:00Z'),
         endTime: new Date('2025-04-01T12:00:00Z'),
         price: 50,
-        seatsAvailable: [0, 1, 0],
       };
       mockService.getShowtimeById.mockResolvedValue(showtime);
 

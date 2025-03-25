@@ -63,7 +63,6 @@ describe('ShowtimesService', () => {
       mockPrisma.showtime.findFirst.mockResolvedValue(null);
       mockPrisma.showtime.create.mockResolvedValue({
         ...dto,
-        seatsAvailable: Array(config.seatsPerShowtime).fill(0),
         id: 1,
       });
 
