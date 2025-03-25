@@ -7,6 +7,10 @@ NodeJS version 18.18 or Higher.
 NestJS version 10 (As provided with the project)
 
 
+The server will run at: http://localhost:3000
+The swagger is available at: http://localhost:3000/api
+
+
 Copy and paste the following commands in your terminal:
 
 ```bash
@@ -30,6 +34,4 @@ npm run start:dev
 
 ```bash
 npm run test
-
-The server will run at: http://localhost:3000
 ```
