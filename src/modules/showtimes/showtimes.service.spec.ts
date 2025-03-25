@@ -16,6 +16,9 @@ describe('ShowtimesService', () => {
       update: jest.fn(),
       delete: jest.fn(),
     },
+    movie: {
+      findUnique: jest.fn(),
+    },
   };
 
   beforeEach(async () => {
@@ -50,12 +53,13 @@ describe('ShowtimesService', () => {
     const dto = {
       movieId: 1,
       theater: 'Theater A',
-      startTime: new Date().toISOString(),
-      endTime: new Date(Date.now() + 3600000).toISOString(),
+      startTime: new Date(),
+      endTime: new Date(Date.now() + 3600000),
       price: 50,
     };
 
     it('should create and return a new showtime', async () => {
+      mockPrisma.movie.findUnique.mockResolvedValue({ id: dto.movieId });
       mockPrisma.showtime.findFirst.mockResolvedValue(null);
       mockPrisma.showtime.create.mockResolvedValue({
         ...dto,
@@ -64,6 +68,17 @@ describe('ShowtimesService', () => {
       });
 
       const result = await service.addShowtime(dto);
+      expect(prisma.showtime.create).toHaveBeenCalledWith({
+        data: {
+          movieId: dto.movieId,
+          theater: dto.theater,
+          startTime: dto.startTime,
+          endTime: dto.endTime,
+          price: dto.price,
+          seatsAvailable: Array(config.seatsPerShowtime).fill(0),
+        },
+      });
+
       expect(result).toEqual({
         id: 1,
         movieId: dto.movieId,
@@ -75,7 +90,12 @@ describe('ShowtimesService', () => {
     });
 
     it('should throw ConflictException for overlapping showtimes', async () => {
-      mockPrisma.showtime.findFirst.mockResolvedValue(dto);
+      mockPrisma.movie.findUnique.mockResolvedValue({ id: dto.movieId });
+      mockPrisma.showtime.findFirst.mockResolvedValue({
+        id: 2,
+        ...dto,
+      });
+
       await expect(service.addShowtime(dto)).rejects.toThrow(ConflictException);
     });
   });

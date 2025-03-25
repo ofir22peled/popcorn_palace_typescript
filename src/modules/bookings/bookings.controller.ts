@@ -23,7 +23,7 @@ export class BookingsController {
   @ApiResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: 'Failed to reserve seat' })
   @ApiBody({ type: CreateBookingDto })
   @UsePipes(new ValidationPipe({ whitelist: true }))
-  async createBooking(@Body() dto: CreateBookingDto) {
+  createBooking(@Body() dto: CreateBookingDto) {
     return this.bookingsService.createBooking(dto);
   }
 }

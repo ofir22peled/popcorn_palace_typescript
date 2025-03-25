@@ -37,10 +37,11 @@ describe('ShowtimesController', () => {
       const dto: CreateShowtimeDto = {
         movieId: 1,
         theater: 'Theater A',
-        startTime: new Date().toISOString(),
-        endTime: new Date(Date.now() + 3600000).toISOString(),
+        startTime: new Date(),
+        endTime: new Date(Date.now() + 3600000),
         price: 50,
       };
+
       mockService.addShowtime.mockResolvedValue({ id: 1, ...dto });
 
       const result = await controller.createShowtime(dto);
@@ -55,14 +56,15 @@ describe('ShowtimesController', () => {
         id: 1,
         movieId: 1,
         theater: 'Theater A',
-        startTime: '2025-04-01T10:00:00Z',
-        endTime: '2025-04-01T12:00:00Z',
+        startTime: new Date('2025-04-01T10:00:00Z'),
+        endTime: new Date('2025-04-01T12:00:00Z'),
         price: 50,
         seatsAvailable: [0, 1, 0],
       };
       mockService.getShowtimeById.mockResolvedValue(showtime);
 
       const result = await controller.getShowtimeById('1');
+      expect(service.getShowtimeById).toHaveBeenCalledWith(1);
       expect(result).toEqual({
         id: showtime.id,
         movieId: showtime.movieId,
@@ -77,11 +79,26 @@ describe('ShowtimesController', () => {
   describe('updateShowtime', () => {
     it('should update showtime', async () => {
       const dto: UpdateShowtimeDto = { price: 60 };
-      mockService.updateShowtime.mockResolvedValue({ id: 1, price: 60 });
+
+      mockService.updateShowtime.mockResolvedValue({
+        id: 1,
+        movieId: 1,
+        theater: 'Theater A',
+        startTime: new Date('2025-04-01T10:00:00Z'),
+        endTime: new Date('2025-04-01T12:00:00Z'),
+        price: 60,
+      });
 
       const result = await controller.updateShowtime('1', dto);
       expect(service.updateShowtime).toHaveBeenCalledWith(1, dto);
-      expect(result).toEqual({ id: 1, price: 60 });
+      expect(result).toEqual({
+        id: 1,
+        movieId: 1,
+        theater: 'Theater A',
+        startTime: new Date('2025-04-01T10:00:00Z'),
+        endTime: new Date('2025-04-01T12:00:00Z'),
+        price: 60,
+      });
     });
   });
 

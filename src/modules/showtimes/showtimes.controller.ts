@@ -28,7 +28,6 @@ export class ShowtimesController {
 @ApiResponse({ status: 200, description: 'Returns all showtimes (excluding seatsAvailable)' })
 async getAllShowtimes() {
   const showtimes = await this.showtimesService.getAllShowtimes();
-
   return showtimes.map(({ seatsAvailable, ...rest }) => rest);
 }
 
@@ -43,8 +42,11 @@ async getAllShowtimes() {
   @ApiResponse({ status: HttpStatus.CONFLICT, description: 'Showtime overlaps with existing one' })
   @ApiBody({ type: CreateShowtimeDto })
   @UsePipes(new ValidationPipe({ whitelist: true }))
-  createShowtime(@Body() dto: CreateShowtimeDto) {
-    return this.showtimesService.addShowtime(dto);
+  async createShowtime(@Body() dto: CreateShowtimeDto) {
+    const showtime = await this.showtimesService.addShowtime(dto);
+    // Excluding seatsAvailable in the response
+    const { seatsAvailable, ...rest } = showtime;
+    return rest;
   }
 
   /**
@@ -78,11 +80,14 @@ async getAllShowtimes() {
   @ApiParam({ name: 'id', description: 'ID of the showtime to update' })
   @ApiBody({ type: UpdateShowtimeDto })
   @UsePipes(new ValidationPipe({ whitelist: true }))
-  updateShowtime(
+  async updateShowtime(
     @Param('id') id: string,
     @Body() dto: UpdateShowtimeDto,
   ) {
-    return this.showtimesService.updateShowtime(+id, dto);
+    const showtime = await this.showtimesService.updateShowtime(+id, dto);
+    // Excluding seatsAvailable in the response
+    const { seatsAvailable, ...rest } = showtime;
+    return rest;
   }
 
   /**
@@ -95,7 +100,9 @@ async getAllShowtimes() {
   @ApiResponse({ status: HttpStatus.OK, description: 'Showtime deleted successfully' })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Showtime not found' })
   @ApiParam({ name: 'id', description: 'ID of the showtime to delete' })
-  deleteShowtime(@Param('id') id: string) {
-    return this.showtimesService.deleteShowtime(+id);
+  async deleteShowtime(@Param('id') id: string) {
+    const showtime = await this.showtimesService.deleteShowtime(+id);
+    const { seatsAvailable, ...rest } = showtime;
+    return rest;
   }
 }
