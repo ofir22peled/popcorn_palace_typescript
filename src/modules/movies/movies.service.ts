@@ -57,36 +57,50 @@ export class MoviesService {
   }
 
   /**
-   * Updates an existing movie, validates existence and release year dynamically.
-   */
-  async updateMovie(movieTitle: string, updatedMovie: UpdateMovieDto): Promise<Movie> {
-    this.logger.log(`Attempting to update movie: ${movieTitle}`);
+ * Updates an existing movie, validates existence and release year dynamically.
+ * Also checks if the new title already exists when the title is changed.
+ */
+async updateMovie(movieTitle: string, updatedMovie: UpdateMovieDto): Promise<Movie> {
+  this.logger.log(`Attempting to update movie: ${movieTitle}`);
 
-    const existing = await this.prisma.movie.findUnique({
-      where: { title: movieTitle },
-    });
+  const existing = await this.prisma.movie.findUnique({
+    where: { title: movieTitle },
+  });
 
-    if (!existing) {
-      this.logger.warn(`Movie "${movieTitle}" not found`);
-      throw new NotFoundException(`Movie "${movieTitle}" not found`);
-    }
-
-    if (updatedMovie.releaseYear) {
-      const currentYear = new Date().getFullYear();
-      if (updatedMovie.releaseYear > currentYear) {
-        this.logger.warn(`Invalid release year: ${updatedMovie.releaseYear}`);
-        throw new BadRequestException(`Release year cannot be greater than ${currentYear}`);
-      }
-    }
-
-    const updated = await this.prisma.movie.update({
-      where: { title: movieTitle },
-      data: updatedMovie,
-    });
-
-    this.logger.log(`Movie "${movieTitle}" updated successfully`);
-    return updated;
+  if (!existing) {
+    this.logger.warn(`Movie "${movieTitle}" not found`);
+    throw new NotFoundException(`Movie "${movieTitle}" not found`);
   }
+
+  // Check if the updated title is different and if it already exists
+  if (updatedMovie.title && updatedMovie.title !== movieTitle) {
+    const movieWithNewTitle = await this.prisma.movie.findUnique({
+      where: { title: updatedMovie.title },
+    });
+
+    if (movieWithNewTitle) {
+      this.logger.warn(`Cannot update movie: New title "${updatedMovie.title}" already exists`);
+      throw new ConflictException(`Movie with title "${updatedMovie.title}" already exists`);
+    }
+  }
+  
+  if (updatedMovie.releaseYear) {
+    const currentYear = new Date().getFullYear();
+    if (updatedMovie.releaseYear > currentYear) {
+      this.logger.warn(`Invalid release year: ${updatedMovie.releaseYear}`);
+      throw new BadRequestException(`Release year cannot be greater than ${currentYear}`);
+    }
+  }
+
+  const updated = await this.prisma.movie.update({
+    where: { title: movieTitle },
+    data: updatedMovie,
+  });
+
+  this.logger.log(`Movie "${movieTitle}" updated successfully`);
+  return updated;
+}
+
 
 /**
  * Deletes a movie by its title after verifying existence.

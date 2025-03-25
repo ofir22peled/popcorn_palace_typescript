@@ -3,7 +3,9 @@
 ### Clone and Run Project
 
 requirements:
-NodeJS version 18.18 or Higher
+NodeJS version 18.18 or Higher.
+NestJS version 10 (As provided with the project)
+
 
 Copy and paste the following commands in your terminal:
 
@@ -13,7 +15,7 @@ cd popcorn_palace_typescript
 npm install
 
 # Start PostgreSQL with Docker Compose (if needed)
-docker-compose up -d
+docker compose up -d
 
 # Setup Prisma
 npx prisma generate
