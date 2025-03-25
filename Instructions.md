@@ -1,4 +1,3 @@
-
 # Popcorn Palace - Quick Setup
 
 ### Clone and Run Project
@@ -21,6 +20,7 @@ npx prisma generate
 npx prisma migrate dev
 
 # Run the application
+npm run build
 npm run start:dev
 ```
 
@@ -30,3 +30,4 @@ npm run start:dev
 npm run test
 
 The server will run at: http://localhost:3000
+```
