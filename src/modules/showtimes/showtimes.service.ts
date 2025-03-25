@@ -7,7 +7,7 @@ import {
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateShowtimeDto } from './dto/create-showtime.dto';
 import { UpdateShowtimeDto } from './dto/update-showtime.dto';
-import { config } from '../../../../config';
+import { config } from '../../../config';
 
 /**
  * Service that handles all business logic related to showtimes.
